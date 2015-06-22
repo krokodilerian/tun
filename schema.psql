@@ -334,6 +334,34 @@ ALTER TABLE ONLY revdns
 
 
 --
+-- Name: links_uniq_num; Type: INDEX; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE UNIQUE INDEX links_uniq_num ON links USING btree (userid, num);
+
+
+--
+-- Name: links_uniq_slug; Type: INDEX; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE UNIQUE INDEX links_uniq_slug ON links USING btree (userid, slug);
+
+
+--
+-- Name: revdns_addr_idx; Type: INDEX; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE UNIQUE INDEX revdns_addr_idx ON revdns USING btree (addr);
+
+
+--
+-- Name: users_slug; Type: INDEX; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE UNIQUE INDEX users_slug ON users USING btree (slug);
+
+
+--
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
 

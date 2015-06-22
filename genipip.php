@@ -1,11 +1,13 @@
 <?php
 
-require_once("config.php");
+
 
 if ($argc!=2) {
 	echo "Usage: $argv[0] userid\n";
 	exit(3);
 }
+
+require_once(dirname(__FILE__)."/config.php");
 
 $uid=(int) $argv[1];
 

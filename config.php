@@ -3,6 +3,8 @@
 global $dbc;
 
 $linknetpfx="2001:67c:21bc:7fff:000";
+$prefix="2001:67c:21bc";
+$maxpfx=32000;
 
 $dbconn = pg_connect("host=localhost dbname=iptun user=vasil");
 
@@ -24,4 +26,10 @@ function iptorevdns64 ($ip) {
 	$hex = $unpack['hex'];
 	$arpa = implode('.', array_reverse(str_split($hex))) . '.ip6.arpa';
 	return $arpa;
+}
+
+function pq_e($q) {
+	$res = pg_query($q);
+	if (!$res) throw new Exception("Failed query ".$q);
+	return $res;
 }

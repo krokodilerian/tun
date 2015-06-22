@@ -302,6 +302,14 @@ ALTER TABLE ONLY revdns ALTER COLUMN id SET DEFAULT nextval('revdns_id_seq'::reg
 
 
 --
+-- Name: assigned_nets_id; Type: CONSTRAINT; Schema: public; Owner: vasil; Tablespace: 
+--
+
+ALTER TABLE ONLY assigned_nets
+    ADD CONSTRAINT assigned_nets_id PRIMARY KEY (id);
+
+
+--
 -- Name: links_pkey; Type: CONSTRAINT; Schema: public; Owner: vasil; Tablespace: 
 --
 
@@ -334,6 +342,14 @@ ALTER TABLE ONLY revdns
 
 
 --
+-- Name: users_id; Type: CONSTRAINT; Schema: public; Owner: vasil; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_id PRIMARY KEY (id);
+
+
+--
 -- Name: links_uniq_num; Type: INDEX; Schema: public; Owner: vasil; Tablespace: 
 --
 
@@ -359,6 +375,54 @@ CREATE UNIQUE INDEX revdns_addr_idx ON revdns USING btree (addr);
 --
 
 CREATE UNIQUE INDEX users_slug ON users USING btree (slug);
+
+
+--
+-- Name: assigned_nets_userid_users_id; Type: FK CONSTRAINT; Schema: public; Owner: vasil
+--
+
+ALTER TABLE ONLY assigned_nets
+    ADD CONSTRAINT assigned_nets_userid_users_id FOREIGN KEY (userid) REFERENCES users(id);
+
+
+--
+-- Name: links_linktyle_linktypes_id; Type: FK CONSTRAINT; Schema: public; Owner: vasil
+--
+
+ALTER TABLE ONLY links
+    ADD CONSTRAINT links_linktyle_linktypes_id FOREIGN KEY (linktype) REFERENCES linktypes(id);
+
+
+--
+-- Name: links_peer_peers_id; Type: FK CONSTRAINT; Schema: public; Owner: vasil
+--
+
+ALTER TABLE ONLY links
+    ADD CONSTRAINT links_peer_peers_id FOREIGN KEY (peer) REFERENCES peers(id);
+
+
+--
+-- Name: links_userid_users_id; Type: FK CONSTRAINT; Schema: public; Owner: vasil
+--
+
+ALTER TABLE ONLY links
+    ADD CONSTRAINT links_userid_users_id FOREIGN KEY (userid) REFERENCES users(id);
+
+
+--
+-- Name: revdns_delegate_netid_assigned_nets_id; Type: FK CONSTRAINT; Schema: public; Owner: vasil
+--
+
+ALTER TABLE ONLY revdns_delegate
+    ADD CONSTRAINT revdns_delegate_netid_assigned_nets_id FOREIGN KEY (netid) REFERENCES assigned_nets(id);
+
+
+--
+-- Name: revdns_userid_users_id; Type: FK CONSTRAINT; Schema: public; Owner: vasil
+--
+
+ALTER TABLE ONLY revdns
+    ADD CONSTRAINT revdns_userid_users_id FOREIGN KEY (userid) REFERENCES users(id);
 
 
 --

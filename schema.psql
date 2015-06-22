@@ -1,0 +1,349 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
+-- Name: ip4r; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS ip4r WITH SCHEMA public;
+
+
+SET search_path = public, pg_catalog;
+
+--
+-- Name: ip6r_split(ip6r); Type: FUNCTION; Schema: public; Owner: vasil
+--
+
+CREATE FUNCTION ip6r_split(range ip6r) RETURNS SETOF ip6r
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+        first_a ip6 := lower(range);
+        last_a ip6 := upper(range);
+        first ip6r;
+        last ip6r;
+BEGIN
+        first=ip6r(first_a::text||'/64');
+        LOOP    
+                if (first_a>last_a) then 
+                        exit;
+                end if;
+                first=ip6r(first_a::text||'/64');
+                return next first;
+                first_a := first_a + 18446744073709551616;
+        END LOOP;
+
+END
+$$;
+
+
+ALTER FUNCTION public.ip6r_split(range ip6r) OWNER TO vasil;
+
+--
+-- Name: ip6r_split(ip6r, integer); Type: FUNCTION; Schema: public; Owner: vasil
+--
+
+CREATE FUNCTION ip6r_split(range ip6r, len integer) RETURNS SETOF ip6r
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+        first_a ip6 := lower(range);
+        last_a ip6 := upper(range);
+        first ip6r;
+BEGIN
+        LOOP
+                if (first_a>last_a) then
+                        exit;
+                end if;
+                first=ip6r(first_a::text||'/'||len::text);
+                return next first;
+                first_a := first_a + pow(2::numeric,(128-len)::numeric)::numeric;
+        END LOOP;
+
+END
+$$;
+
+
+ALTER FUNCTION public.ip6r_split(range ip6r, len integer) OWNER TO vasil;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: assigned_nets; Type: TABLE; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE TABLE assigned_nets (
+    id integer NOT NULL,
+    userid integer NOT NULL,
+    range ip6r NOT NULL
+);
+
+
+ALTER TABLE assigned_nets OWNER TO vasil;
+
+--
+-- Name: assigned_nets_id_seq; Type: SEQUENCE; Schema: public; Owner: vasil
+--
+
+CREATE SEQUENCE assigned_nets_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE assigned_nets_id_seq OWNER TO vasil;
+
+--
+-- Name: assigned_nets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vasil
+--
+
+ALTER SEQUENCE assigned_nets_id_seq OWNED BY assigned_nets.id;
+
+
+--
+-- Name: links; Type: TABLE; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE TABLE links (
+    id integer NOT NULL,
+    userid integer NOT NULL,
+    slug character varying(3) NOT NULL,
+    num integer NOT NULL,
+    linktype integer NOT NULL,
+    linkinfo text,
+    peer integer NOT NULL,
+    localid character varying(8)
+);
+
+
+ALTER TABLE links OWNER TO vasil;
+
+--
+-- Name: links_id_seq; Type: SEQUENCE; Schema: public; Owner: vasil
+--
+
+CREATE SEQUENCE links_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE links_id_seq OWNER TO vasil;
+
+--
+-- Name: links_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vasil
+--
+
+ALTER SEQUENCE links_id_seq OWNED BY links.id;
+
+
+--
+-- Name: linktypes; Type: TABLE; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE TABLE linktypes (
+    id integer NOT NULL,
+    name character varying(32)
+);
+
+
+ALTER TABLE linktypes OWNER TO vasil;
+
+--
+-- Name: linktypes_id_seq; Type: SEQUENCE; Schema: public; Owner: vasil
+--
+
+CREATE SEQUENCE linktypes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE linktypes_id_seq OWNER TO vasil;
+
+--
+-- Name: linktypes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vasil
+--
+
+ALTER SEQUENCE linktypes_id_seq OWNED BY linktypes.id;
+
+
+--
+-- Name: peers; Type: TABLE; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE TABLE peers (
+    id integer NOT NULL,
+    name character varying(16) NOT NULL,
+    localip4 ip4
+);
+
+
+ALTER TABLE peers OWNER TO vasil;
+
+--
+-- Name: revdns; Type: TABLE; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE TABLE revdns (
+    id integer NOT NULL,
+    userid integer NOT NULL,
+    addr ip6,
+    name character varying(255)
+);
+
+
+ALTER TABLE revdns OWNER TO vasil;
+
+--
+-- Name: revdns_delegate; Type: TABLE; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE TABLE revdns_delegate (
+    netid integer NOT NULL,
+    server character varying(255) NOT NULL
+);
+
+
+ALTER TABLE revdns_delegate OWNER TO vasil;
+
+--
+-- Name: revdns_id_seq; Type: SEQUENCE; Schema: public; Owner: vasil
+--
+
+CREATE SEQUENCE revdns_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE revdns_id_seq OWNER TO vasil;
+
+--
+-- Name: revdns_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vasil
+--
+
+ALTER SEQUENCE revdns_id_seq OWNED BY revdns.id;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: vasil; Tablespace: 
+--
+
+CREATE TABLE users (
+    id integer NOT NULL,
+    slug character varying(8) NOT NULL,
+    name text,
+    email text,
+    contactinfo text
+);
+
+
+ALTER TABLE users OWNER TO vasil;
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: vasil
+--
+
+ALTER TABLE ONLY assigned_nets ALTER COLUMN id SET DEFAULT nextval('assigned_nets_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: vasil
+--
+
+ALTER TABLE ONLY links ALTER COLUMN id SET DEFAULT nextval('links_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: vasil
+--
+
+ALTER TABLE ONLY linktypes ALTER COLUMN id SET DEFAULT nextval('linktypes_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: vasil
+--
+
+ALTER TABLE ONLY revdns ALTER COLUMN id SET DEFAULT nextval('revdns_id_seq'::regclass);
+
+
+--
+-- Name: links_pkey; Type: CONSTRAINT; Schema: public; Owner: vasil; Tablespace: 
+--
+
+ALTER TABLE ONLY links
+    ADD CONSTRAINT links_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: linktypes_pkey; Type: CONSTRAINT; Schema: public; Owner: vasil; Tablespace: 
+--
+
+ALTER TABLE ONLY linktypes
+    ADD CONSTRAINT linktypes_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: peers_pkey; Type: CONSTRAINT; Schema: public; Owner: vasil; Tablespace: 
+--
+
+ALTER TABLE ONLY peers
+    ADD CONSTRAINT peers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: revdns_pkey; Type: CONSTRAINT; Schema: public; Owner: vasil; Tablespace: 
+--
+
+ALTER TABLE ONLY revdns
+    ADD CONSTRAINT revdns_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

@@ -1,0 +1,19 @@
+create or replace function ip6r_split(range ip6r, len int) returns setof ip6r as
+$$
+DECLARE
+	first_a ip6 := lower(range);
+	last_a ip6 := upper(range);
+	first ip6r;
+BEGIN
+	LOOP
+		if (first_a>last_a) then 
+			exit;		
+		end if;
+		first=ip6r(first_a::text||'/'||len::text);
+		return next first;
+		first_a := first_a + pow(2::numeric,(128-len)::numeric)::numeric;
+	END LOOP;
+
+END
+$$
+language 'plpgsql';

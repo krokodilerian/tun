@@ -35,7 +35,7 @@ try {
 	$row = pg_fetch_object($res);
 	$modeid = $row->id;
 
-	$res = pq_e("SELECT max(num)+1 as num FROM links WHERE userid=$uid");
+	$res = pq_e("SELECT coalesce(max(num)+1,0) as num FROM links WHERE userid=$uid");
 	$row = pg_fetch_object($res);
 	$num = $row->num;
 

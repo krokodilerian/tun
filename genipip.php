@@ -27,7 +27,6 @@ while ($row = pg_fetch_object($res)) {
 
 	echo "auto $usr_ifname\n";
 	echo "iface $usr_ifname inet6 v4tunnel\n";
-	echo "\tmode ipip\n";
 	echo "\tttl 225\n";
 	echo "\taddress $linknetpfx$row->peerid:$row->userid:$row->linknum:2\n";
 	echo "\tnetmask 120\n";
@@ -40,7 +39,6 @@ while ($row = pg_fetch_object($res)) {
 
 	echo "auto $srv_ifname\n";
 	echo "iface $srv_ifname inet6 v4tunnel\n";
-	echo "\tmode ipip\n";
 	echo "\tttl 225\n";
 	echo "\taddress $linknetpfx$row->peerid:$row->userid:$row->linknum:1\n";
 	echo "\tnetmask 120\n";

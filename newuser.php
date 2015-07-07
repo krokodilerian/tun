@@ -28,7 +28,7 @@ try {
 
 	for ($i=1; $i < $maxpfx; $i++) {
 		$hh = sprintf("%x", $i);
-		$res = pq_e("SELECT count(*) AS cnt FROM assigned_nets WHERE range && '$prefix:$hh::/$range'");
+		$res = pq_e("SELECT count(*) AS cnt FROM assigned_nets WHERE range && ( '$prefix:$hh::'::ip6 &  ((pow(2::numeric,(128)::numeric)::numeric - (pow(2::numeric,(128-$range)::numeric)::numeric))::ip6 )||'/$range')::ip6r");
 		$row = pg_fetch_object($res);
 		if ($row->cnt == 0) break;
 	}
